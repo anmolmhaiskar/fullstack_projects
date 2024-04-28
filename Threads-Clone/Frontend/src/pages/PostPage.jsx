@@ -1,45 +1,63 @@
-import { Avatar, Box, Button, Divider, Flex, Image, Text } from "@chakra-ui/react";
-import { useState } from "react";
-import { BsThreeDots } from "react-icons/bs";
-import { useLocation } from "react-router-dom";
+import { DeleteIcon } from "@chakra-ui/icons";
+import { Avatar, Box, Button, Divider, Flex, Image, Spinner, Text } from "@chakra-ui/react";
+import { formatDistanceToNow } from "date-fns";
+import { useRecoilValue } from "recoil";
+import userAtom from "../atoms/userAtom";
 import Actions from "../components/Actions";
 import Comment from "../components/Comment";
-import UserLikesAndReplies from "../components/UserLikesAndReplies";
 import UserLikesAvatar from "../components/UserLikesAvatar";
 import UserName from "../components/UserName";
+import useDeletePost from "../hooks/useDeletePost";
+import useGetPosts from "../hooks/useGetPosts";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+
 
 const PostPage = () => {
-  const props = useLocation()?.state?.props;
-  const [liked, setLiked] = useState(0);
+  const { user, loading } = useGetUserProfile();
+  const {posts, fetchingPosts} = useGetPosts("GET_POST_BY_ID");
+  const currentUser = useRecoilValue(userAtom);
+  const handleDeletePost = useDeletePost(posts);
+
+  if((!user && loading) || (!posts && fetchingPosts)){
+    return (
+      <Flex justifyContent={"center"}>
+        <Spinner size="xl" />
+      </Flex>
+    );
+  }
+
   return (
     <>
       <Flex>
         <Flex w={"full"} alignItems={"center"} gap={3}>
-          <Avatar size="md" name="Mark Zuckerberg" src="/zuck-avatar.png" />
+          <Avatar size="md" name={user.usernameS} src={user.profilePic} />
           <Flex>
             <UserName
               isVerified={true}
               fontSize="sm"
-              userName="markzukerberg"
+              userName={user.username}
             />
           </Flex>
         </Flex>
         <Flex gap={4} alignItems={"center"}>
-          <Text fontSize={"sm"} color={"gray.light"}>
-            1d
-          </Text>
-          <BsThreeDots />
+            <Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"} >
+              {posts?.createdAt &&
+                formatDistanceToNow(new Date(posts?.createdAt)) + " ago"}
+            </Text>
+            
+            {currentUser?._id === user._id && <DeleteIcon onClick={handleDeletePost} />}
+          
+          </Flex>
         </Flex>
-      </Flex>
-      <Text fontSize={"sm"}>{props.caption}</Text>
-      {props.img && (
+      <Text fontSize={"sm"}>{posts.text}</Text>
+      {posts.img && (
         <Box
           borderRadius={6}
           overflow={"hidden"}
           border={"1px solid"}
           borderColor={"gray.light"}
         >
-          <Image src={props.img} w={"full"} />
+          <Image src={posts.img} w={"full"} />
         </Box>
       )}
       <Flex gap={2} mt={3}>
@@ -62,13 +80,8 @@ const PostPage = () => {
         </Box>
       </Flex>
       <Flex gap={3}>
-        <Actions liked={liked} setLiked={setLiked} />
+        <Actions post={posts} />
       </Flex>
-      <UserLikesAndReplies
-        likes={props.likes + (liked ? 1 : 0)}
-        replies={props.replies}
-        fontSize="sm"
-      />
       <Divider my={4} />
       <Flex justifyContent={"space-between"}>
         <Flex gap={2} alignItems={"center"}>
@@ -80,10 +93,11 @@ const PostPage = () => {
         <Button>Get</Button>
       </Flex>
       <Divider my={4} />
-      <Comment likes={23} comment={"Hey, this looks great!"} createdAt={2} userName="Rajesh" avatar="https://bit.ly/ryan-florence" isVerified={false}/>
-      <Comment likes={10} comment={"wow! you finally made it"} createdAt={3} userName="Rohit" avatar="https://bit.ly/code-beast" isVerified={true}/>
-      <Comment likes={30} comment={"I am gonna use it for self promotion"} createdAt={3} userName="Dan Brown" avatar="https://bit.ly/dan-abramov" isVerified={true}/>
-    </>
+      {posts.replies.map(reply => (
+        //TODO: add likes and reply feature to comment
+        <Comment key={reply._id} likes={23} comment={reply.text} createdAt={2} userName={reply.username} avatar={reply.userProfilePic} isVerified={false}/>
+      ))}
+      </>
   );
 };
 

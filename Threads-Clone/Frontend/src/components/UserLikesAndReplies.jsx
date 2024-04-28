@@ -6,14 +6,10 @@ const UserLikesAndReplies = (props) => {
       <Text color={"gray.light"} fontSize={"sm"}>
         {props.likes} Likes
       </Text>
-      {props.replies && (
-        <>
-          <Box w="0.5" h="0.5" bg={"gray.light"} borderRadius={"full"}></Box>
-          <Text color={"gray.light"} fontSize={props.fondSize}>
-            {props.replies} Replies
-          </Text>
-        </>
-      )}
+      <Box w="0.5" h="0.5" bg={"gray.light"} borderRadius={"full"}></Box>
+      <Text color={"gray.light"} fontSize={props.fontSize}>
+        {props.replies} Replies
+      </Text>
     </Flex>
   );
 }
