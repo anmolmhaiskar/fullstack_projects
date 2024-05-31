@@ -2,7 +2,8 @@ import { AddIcon } from "@chakra-ui/icons";
 import { Button, CloseButton, Flex, FormControl, Image, Input, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Text, Textarea, useColorModeValue, useDisclosure } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { BsFillImageFill } from "react-icons/bs";
-import { useRecoilValue } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
+import postsAtom from "../atoms/postsAtom";
 import userAtom from "../atoms/userAtom";
 import usePreviewImg from "../hooks/usePreviewImg";
 import useShowToast from "../hooks/useShowToast";
@@ -14,6 +15,7 @@ const CreatePost = () => {
     const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
     const [loading, setLoading] = useState(false);
     const user = useRecoilValue(userAtom);
+    const [posts, setPosts] = useRecoilState(postsAtom);
     const showToast = useShowToast();
     const MAX_CHAR = 500;
 
@@ -50,6 +52,7 @@ const CreatePost = () => {
               showToast("Error", data.error, "error");
               return;
             }
+            setPosts([data.post, ...posts]);
             showToast("Success", "Post Created Successfully!", "success");
             onClose();
         } catch (error) {
@@ -64,14 +67,14 @@ const CreatePost = () => {
           position={"fixed"}
           bottom={10}
           right={10}
-          leftIcon={<AddIcon />}
           bg={useColorModeValue("gray.300", "gray.dark")}
+          size={{ base: "sm", sm: "md" }}
           onClick={() => {
             initializePost();
             onOpen();
         }}
         >
-          Post
+          <AddIcon />
         </Button>
 
         <Modal isOpen={isOpen} onClose={onClose}>

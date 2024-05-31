@@ -163,7 +163,7 @@ export const replyToPost = async (req, res) => {
         post.replies.push(reply);
         await post.save();
 
-        res.status(201).json({message: "Reply added successfully", post});
+        res.status(201).json(reply);
     } catch (error) {
         console.log("Failed to get post: ", error.message);
         res.status(500).json({ error: error.message });

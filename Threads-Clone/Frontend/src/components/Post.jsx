@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useRecoilValue } from "recoil";
 import userAtom from "../atoms/userAtom";
+import useDeletePost from "../hooks/useDeletePost";
 import useShowToast from "../hooks/useShowToast";
 import Actions from "./Actions";
 import UserLikesAvatar from "./UserLikesAvatar";
@@ -13,9 +14,8 @@ import UserName from "./UserName";
 const Post = ({post, postedBy}) => {
   const currentUser = useRecoilValue(userAtom);
   const [user, setUser] = useState();
-  // const [posts, setPosts] = useRecoilState(postsAtom);
+  const handleDeletePost = useDeletePost();
   const showToast = useShowToast();
-  const props = null;
   const navigate = useNavigate();
   useEffect(() => {
     const getUser = async () => {
@@ -26,7 +26,7 @@ const Post = ({post, postedBy}) => {
           showToast("Error", data.error, "error");
           return;
         }
-        setUser(data.user);
+        setUser(data);
       } catch (error) {
         showToast("Error", error, "error");
         setUser(null);
@@ -34,36 +34,11 @@ const Post = ({post, postedBy}) => {
     };
     getUser();
   }, [postedBy, showToast]);
-    
-  const handleDeletePost = async (e) => {
-    try {
-      e.preventDefault();
-      if(!window.confirm("Are you sure you want to delete this post?")){
-        return;
-      }
-      const res = await fetch(`/api/posts/${post._id}`, {
-        method: "DELETE",
-      });
-
-      let data = null;
-      if(res.status !== 204){
-        data = await res.json();
-        if(data.error){
-            showToast("Error", data.error, "error");
-            return;
-        }
-      }
-      showToast("Success", "Post Deleted", "success");
-    } catch (error) {
-      showToast("Error", error.message, "error");
-    }    
-  }
-  
 
   if(!post || !user) return null;
 
   return (
-    <Link to={`/${user.username}/posts/${post._id}`} state={{ props }}>
+    <Link to={`/${user.username}/posts/${post._id}`}>
       <Flex gap={3} mb={4} py={5}>
         <Flex flexDirection={"column"} alignItems={"center"}>
           <Avatar
@@ -77,7 +52,7 @@ const Post = ({post, postedBy}) => {
           />
           <Box w="1px" h={"full"} bg={"gray.light"} my={2}></Box>
           <Box position={"relative"} w={"full"}>
-            {post.replies[0] && (
+            {post?.replies[0] && (
               <UserLikesAvatar
                 size="2xs"
                 name={post.replies[0].username}
@@ -110,22 +85,33 @@ const Post = ({post, postedBy}) => {
                 userName={user.username}
               />
             </Flex>
-            
+
             <Flex gap={4} alignItems={"center"}>
-              <Text fontSize={"xs"} width={36} textAlign={"right"} color={"gray.light"} >
+              <Text
+                fontSize={"xs"}
+                width={36}
+                textAlign={"right"}
+                color={"gray.light"}
+              >
                 {post?.createdAt &&
                   formatDistanceToNow(new Date(post?.createdAt)) + " ago"}
               </Text>
-              
-              {currentUser?._id === user._id && <DeleteIcon onClick={handleDeletePost} />}
-            
+
+              {currentUser?._id === user._id && (
+                <DeleteIcon onClick={(e) => handleDeletePost(e, post)} />
+              )}
             </Flex>
           </Flex>
 
           <Text fontSize={"sm"}>{post.text}</Text>
-          
+
           {post.img && (
-            <Box borderRadius={6} overflow={"hidden"} border={"1px solid"} borderColor={"gray.light"}>
+            <Box
+              borderRadius={6}
+              overflow={"hidden"}
+              border={"1px solid"}
+              borderColor={"gray.light"}
+            >
               <Image src={post.img} w={"full"} />
             </Box>
           )}

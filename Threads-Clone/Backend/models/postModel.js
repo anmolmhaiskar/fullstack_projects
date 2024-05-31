@@ -5,7 +5,7 @@ const postSchema = mongoose.Schema(
     postedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      reqiored: true,
+      reqiured: true,
     },
     text: {
       type: String,
@@ -19,6 +19,7 @@ const postSchema = mongoose.Schema(
       ref: "User",
       default: [],
     },
+    //TODO: use replyModel here to add likes, reply to comment functionality in future
     replies: [
       {
         userId: {

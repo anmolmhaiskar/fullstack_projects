@@ -7,6 +7,7 @@ const usePreviewImg = () => {
     
     const handleImageChange = (event) => {
         const file = event.target.files[0];
+        console.log(file.type);
         if(file && file.type.startsWith("image/")){
             const reader = new FileReader();
             reader.onloadend = () => {

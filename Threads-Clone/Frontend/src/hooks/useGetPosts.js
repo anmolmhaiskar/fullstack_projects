@@ -1,28 +1,37 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useRecoilState } from 'recoil';
+import postsAtom from '../atoms/postsAtom';
+import { getPostById, getPostByUsername } from '../constants/string';
 import useShowToast from './useShowToast';
 
 const useGetPosts = (type) => {
   const showToast = useShowToast();
   const [fetchingPosts, setFetchingPosts] = useState(true);
   const { username, postId } = useParams();
-  const [posts, setPosts] = useState(null);
+  const [posts, setPosts] = useRecoilState(postsAtom);
   useEffect(() => {
     const getPosts = async () => {
       try {
-        console.log(username, postId);
+        setPosts(null);
         let req = null;
         switch (type) {
-          case "GET_POST_BY_USERNAME":
+          case getPostByUsername:
             req = await fetch(`/api/posts/user/${username}`);
+            if (req) {
+              const data = await req.json();
+              setPosts(data);
+            }
             break;
-          case "GET_POST_BY_ID":
+          case getPostById:
             req = await fetch(`/api/posts/${postId}`);
+            if (req) {
+              const data = await req.json();
+              setPosts([data]);
+            }
             break;
+          default: setPosts(null);
         }
-        const data = await req.json();
-        console.log(type, data);
-        setPosts(data);
       } catch (error) {
         showToast("Error", error, "error");
       } finally {
@@ -30,7 +39,7 @@ const useGetPosts = (type) => {
       }
     };
     getPosts();
-  }, [postId, username, showToast, type]);
+  }, [postId, username, showToast, type, setPosts]);
 
   return { posts, fetchingPosts };
 };

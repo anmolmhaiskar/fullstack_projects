@@ -1,12 +1,13 @@
 import { Flex, Spinner } from "@chakra-ui/react";
 import Post from "../components/Post";
 import UserHeader from "../components/UserHeader";
+import { getPostByUsername } from "../constants/string";
 import useGetPosts from "../hooks/useGetPosts";
 import useGetUserProfile from "../hooks/useGetUserProfile";
 
 const UserPage = () => {
   const {user, loading} = useGetUserProfile();
-  const { posts, fetchingPosts } = useGetPosts("GET_POST_BY_USERNAME");
+  const { posts, fetchingPosts } = useGetPosts(getPostByUsername);
 
 
   if(!user && loading){
@@ -18,6 +19,7 @@ const UserPage = () => {
   }
 
   if(!user && !loading){
+    console.log(user, loading);
     return <h1>User not found</h1>
   }
 
