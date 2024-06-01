@@ -15,13 +15,13 @@ const HomePage = () => {
   const [posts, setPosts] = useRecoilState(postsAtom);
   const user = useRecoilValue(userAtom);
 
-  useEffect(()=>{
+  useEffect(() => {
     const getFeedPosts = async () => {
       setLoading(true);
       try {
         const res = await fetch("/api/posts/feed");
         const data = await res.json();
-        if(data.error){
+        if (data.error) {
           showToast("Error", data.error, "error");
           return;
         } else {
@@ -32,7 +32,7 @@ const HomePage = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
     getFeedPosts();
   }, [showToast, setPosts]);
 
